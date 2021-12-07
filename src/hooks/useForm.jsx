@@ -13,6 +13,11 @@ export const useForm = (initialState = {}) =>{
         });
     }
 
-    return [ formulario, handleInputChange ];
+    const resetForm = () =>{
+
+        setFormulario(initialState);
+    }
+
+    return [ formulario, handleInputChange,resetForm ];
 
 }

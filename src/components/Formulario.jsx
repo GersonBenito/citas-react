@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { validateForm } from '../helpers/validateForm';
 import { useForm } from '../hooks/useForm';
+import { Error } from './Error';
 
-export const Formulario = () => {
+export const Formulario = ({ setPacientes, pacientes }) => {
 
     const [error, setError] = useState(false);
 
-    const [formulario, handleInputChange] = useForm({
+    const [formulario, handleInputChange, resetForm] = useForm({
         mascota: '',
         propietario: '',
         email: '',
@@ -17,19 +18,23 @@ export const Formulario = () => {
     const { mascota, propietario, email, alta, sintomas } = formulario;
 
     const handleSubmit = (e) =>{
-        
+        let uid = Date.now().toString(36) + Math.random().toString(36).substr(2);
+
         e.preventDefault();
+
+        const datos = {uid, ...formulario}
        
         // validar formulario
-        const [validate] = validateForm(formulario);
+        const [validate] = validateForm(datos);
 
         if(validate){
             setError(validate);
             return;
         }
         
-        console.log(formulario);
+        setPacientes([datos, ...pacientes])
         setError(validate);
+        resetForm();
 
     }
 
@@ -43,10 +48,7 @@ export const Formulario = () => {
 
             <form onSubmit={ handleSubmit } className="bg-white shadow-md rounded-lg py-10 px-5 mb-10">
                 {
-                    error && 
-                        <div className="bg-red-600 text-white text-center p-3 uppercase font-bold mb-3 rounded-md">
-                            <p>Todos los campos son requeridos</p>
-                        </div>
+                    error && <Error message='Uno o mas campos vacios!' />
                 }
                 <div className="mb-5">
                     <label 
