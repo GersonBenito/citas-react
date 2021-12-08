@@ -1,13 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { generaraUid } from '../helpers/generarUid';
 import { validateForm } from '../helpers/validateForm';
-import { useForm } from '../hooks/useForm';
 import { Error } from './Error';
 
-export const Formulario = ({ setPacientes, pacientes }) => {
+export const Formulario = ({ setPacientes, pacientes, paciente, setPaciente }) => {
 
     const [error, setError] = useState(false);
 
-    const [formulario, handleInputChange, resetForm] = useForm({
+    const [formulario, setFormulario] = useState({
         mascota: '',
         propietario: '',
         email: '',
@@ -17,26 +17,76 @@ export const Formulario = ({ setPacientes, pacientes }) => {
 
     const { mascota, propietario, email, alta, sintomas } = formulario;
 
+    const handleInputChange = ({target}) =>{
+        const { name, value } = target;
+
+        setFormulario({
+            ...formulario,
+            [name]: value
+        });
+    }
+
+    const resetForm = () =>{
+
+        setFormulario({
+            mascota: '',
+            propietario: '',
+            email: '',
+            alta: '',
+            sintomas: '',
+        });
+    }
+
     const handleSubmit = (e) =>{
-        let uid = Date.now().toString(36) + Math.random().toString(36).substr(2);
-
+        
         e.preventDefault();
-
-        const datos = {uid, ...formulario}
        
         // validar formulario
-        const [validate] = validateForm(datos);
+        const [validate] = validateForm(formulario);
 
         if(validate){
             setError(validate);
             return;
         }
+
+        if(paciente.uid){
+            // editar paciente
+            const datos = {
+                uid: paciente.uid, 
+                ...formulario
+            }
+
+            const pacienteActulizado = pacientes.map( pacienteState => pacienteState.uid === paciente.uid ? datos : pacienteState );
+
+            setPacientes(pacienteActulizado);
+            setPaciente({});
+
+        }else{
+            // agregar paciente
+            const datos = {
+                uid: generaraUid(), 
+                ...formulario
+            }
+            setPacientes([datos, ...pacientes])
+        }
         
-        setPacientes([datos, ...pacientes])
         setError(validate);
         resetForm();
 
     }
+
+    const handleCancelUpdate = () =>{
+        setPaciente({});
+        resetForm();
+    }
+
+    useEffect(()=>{
+
+        if(Object.keys(paciente).length > 0){
+            setFormulario(paciente);
+        }
+
+    },[paciente])
 
     return (
         <div className="md:w-1/2 lg:w-2/5 mx-5" >
@@ -139,22 +189,45 @@ export const Formulario = ({ setPacientes, pacientes }) => {
                     />
                 </div>
 
-                <input 
-                    type="submit"
-                    className="
-                        bg-indigo-600 
-                        w-full 
-                        text-white 
-                        uppercase 
-                        font-bold 
-                        rounded-md 
-                        p-3 
-                        hover:bg-indigo-700
-                        cursor-pointer
-                        transition-all
-                    "
-                    value="Agregar Paciente" 
-                />
+                <div className="text-center flex justify-between">
+
+                    <input 
+                        type="submit"
+                        className={`
+                            bg-indigo-600 
+                            text-white 
+                            ${!paciente.uid ? 'w-full':''}
+                            uppercase 
+                            font-bold 
+                            rounded-md 
+                            p-3 
+                            hover:bg-indigo-700
+                            cursor-pointer
+                            transition-all
+                        `}
+                        value={ paciente.uid ? 'Editar Paciente' : 'Agregar Paciente' } 
+                    />
+                   
+                    {
+                        paciente.uid &&
+                            <input 
+                                type="button"
+                                className="
+                                    bg-green-500
+                                    text-white 
+                                    uppercase 
+                                    font-bold 
+                                    rounded-md 
+                                    p-3 
+                                    hover:bg-green-700
+                                    cursor-pointer
+                                    transition-all
+                                "
+                                value="Cancelar" 
+                                onClick={ handleCancelUpdate }
+                            />   
+                    }
+                </div>
             </form>
         </div>
     )

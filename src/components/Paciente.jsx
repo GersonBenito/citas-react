@@ -1,5 +1,19 @@
+export const Paciente = ({ paciente, setPaciente, eliminarPaciente }) => {
 
-export const Paciente = ({ mascota, propietario, email, alta, sintomas }) => {
+    const { mascota, propietario, email, alta, sintomas, uid } = paciente;
+
+    const handleGetPaciente = () =>{
+        setPaciente(paciente);
+    }
+
+    const handleConfirm = () =>{
+        
+        const respuesta =confirm(`Esta seguro de eliminar ${mascota} del propietario ${propietario}?`);
+        if(respuesta){
+            eliminarPaciente(uid);
+        }
+
+    }
 
     return (
         <>
@@ -28,6 +42,34 @@ export const Paciente = ({ mascota, propietario, email, alta, sintomas }) => {
                     Sintomas: {''}
                     <span className="font-normal normal-case">{ sintomas }</span>
                 </p>
+                <div className="flex justify-between">
+                    <button 
+                        className="
+                            py-2 px-10 
+                            bg-indigo-600 
+                            hover:bg-indigo-700 
+                            text-white font-bold 
+                            uppercase 
+                            rounded-lg
+                        "
+                        onClick={ handleGetPaciente }
+                    >
+                        Editar
+                    </button>
+                    <button 
+                        className="
+                            py-2 px-10 
+                            bg-red-600 
+                            hover:bg-red-700 
+                            text-white font-bold 
+                            uppercase 
+                            rounded-lg
+                        "
+                        onClick={ handleConfirm }
+                    >
+                        Eliminar
+                    </button>
+                </div>
             </div>
         </>
     )
